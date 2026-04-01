@@ -1,10 +1,3 @@
-/*
- * read_write.cpp
- *
- *  Created on: 2016. 2. 21.
- *      Author: leon
- */
-
 //
 // *********     Read and Write Example      *********
 //
@@ -47,8 +40,27 @@
 #define PROTOCOL_VERSION                1.0                 // See which protocol version is used in the Dynamixel
 
 // Default setting
-#define DXL_ID                          1                   // Dynamixel ID: 1
-#define DXL_ID2                         2                  // Dynamixel ID: 2
+
+typedef enum {
+  DXL_ID0 = 0,
+  DXL_ID1 = 1,
+  DXL_ID2 = 2,
+  DXL_ID3 = 3,
+  DXL_ID4 = 4,
+  DXL_ID5 = 5,
+  DXL_ID6 = 6,
+  DXL_ID7 = 7,
+  DXL_ID8 = 8,
+  DXL_ID9 = 9,
+  DXL_ID10 = 10,
+  DXL_ID11 = 11,
+  DXL_ID12 = 12,
+  DXL_ID13 = 13,
+  DXL_ID14 = 14,
+  DXL_ID15 = 15,
+  DXL_ID16 = 16,
+  DXL_ID17 = 17
+} DXL_ID;
 
 // sync
 #define LEN_MX_GOAL_POSITION            2
@@ -116,6 +128,7 @@ int kbhit(void)
 #endif
 }
 
+//DYNA unction
 #include <iostream>
 #include <string.h>
 
@@ -132,6 +145,40 @@ void check_comm(dynamixel::PacketHandler *packetHandler, int dxl_comm_result, ui
   {
     std::cout << str << std::endl;
     }
+}
+
+void Set_dyna(int ID, dynamixel::PacketHandler *packetHandler, dynamixel::PortHandler *portHandler){
+  uint8_t dxl_error = 0;                          // Dynamixel error
+  int dxl_comm_result = COMM_TX_FAIL;             // Communication result
+
+  // Enable DXL Torque
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, ID, ADDR_MX_TORQUE_ENABLE, TORQUE_ENABLE, &dxl_error);
+  check_comm(packetHandler,dxl_comm_result,dxl_error,"Dynamixel has been successfully connected \n");
+
+  // Change Punch
+  dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, ID, ADDR_PUNCH, PUNCH_VALUE, &dxl_error);
+  check_comm(packetHandler,dxl_comm_result,dxl_error,"Punch has been succesfully change\n");
+
+  // Change CW/CCW Marging
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, ID, ADDR_SLOPE_CW, 0x84, &dxl_error);
+  check_comm(packetHandler,dxl_comm_result,dxl_error,"CW Slope has been succesfully change\n");
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, ID, ADDR_SLOPE_CCW, 0x20, &dxl_error);
+  check_comm(packetHandler,dxl_comm_result,dxl_error,"CCW Slope has been succesfully change\n");
+
+  // Change CW/CCW Marging
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, ID, ADDR_MARGING_CW, 0x01, &dxl_error);
+  check_comm(packetHandler,dxl_comm_result,dxl_error,"CW margin has been succesfully change\n");
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, ID, ADDR_MARGING_CCW, 0x01, &dxl_error);
+  check_comm(packetHandler,dxl_comm_result,dxl_error,"CCW margin has been succesfully change\n");
+}
+
+void Write_dyna_to_sync (int ID, dynamixel::GroupSyncWrite &groupSyncWrite, uint8_t param_goal_position[2]){
+  bool dxl_addparam_result = false;                // addParam result
+  dxl_addparam_result = groupSyncWrite.addParam(ID, param_goal_position);
+  if (dxl_addparam_result != true)
+  {
+    fprintf(stderr, "[ID:%03d] groupSyncWrite addparam failed", ID);
+  }
 }
 
 int main()
@@ -180,46 +227,10 @@ int main()
   }
 
   //Dyna1
-  // Enable DXL Torque
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_ENABLE, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"Dynamixel has been successfully connected \n");
-
-  // Change Punch
-  dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, DXL_ID, ADDR_PUNCH, PUNCH_VALUE, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"Punch has been succesfully change\n");
-
-  // Change CW/CCW Marging
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_SLOPE_CW, 0x84, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"CW Slope has been succesfully change\n");
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_SLOPE_CCW, 0x20, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"CCW Slope has been succesfully change\n");
-
-  // Change CW/CCW Marging
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_MARGING_CW, 0x01, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"CW margin has been succesfully change\n");
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_MARGING_CCW, 0x01, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"CCW margin has been succesfully change\n");
-
+  Set_dyna(DXL_ID1, packetHandler, portHandler);
+  
   //Dyna2
-  // Enable DXL Torque
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID2, ADDR_MX_TORQUE_ENABLE, TORQUE_ENABLE, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"Dynamixel has been successfully connected \n");
-
-  // Change Punch
-  dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, DXL_ID2, ADDR_PUNCH, PUNCH_VALUE, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"Punch has been succesfully change\n");
-
-  // Change CW/CCW Marging
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID2, ADDR_SLOPE_CW, 0x84, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"CW Slope has been succesfully change\n");
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID2, ADDR_SLOPE_CCW, 0x20, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"CCW Slope has been succesfully change\n");
-
-  // Change CW/CCW Marging
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID2, ADDR_MARGING_CW, 0x01, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"CW margin has been succesfully change\n");
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID2, ADDR_MARGING_CCW, 0x01, &dxl_error);
-  check_comm(packetHandler,dxl_comm_result,dxl_error,"CCW margin has been succesfully change\n");
+  Set_dyna(DXL_ID2, packetHandler, portHandler);
 
   while(1)
   {
@@ -227,27 +238,20 @@ int main()
     if (getch() == ESC_ASCII_VALUE)
       break;
 
-    param_goal_position[0] = DXL_LOBYTE(dxl_goal_position[index]);
+    param_goal_position[0] = DXL_LOBYTE(dxl_goal_position[index]); //TODO add all the payload (2 byte / payload)
     param_goal_position[1] = DXL_HIBYTE(dxl_goal_position[index]);
-    // Write goal position
+
+    // Write goal position (alone)
     // dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, DXL_ID, ADDR_MX_GOAL_POSITION, dxl_goal_position[index], &dxl_error);
     // check_comm(packetHandler,dxl_comm_result,dxl_error,"");
 
     // Add Dynamixel#1 goal position value to the Syncwrite storage
-    dxl_addparam_result = groupSyncWrite.addParam(DXL_ID, param_goal_position);
-    if (dxl_addparam_result != true)
-    {
-      fprintf(stderr, "[ID:%03d] groupSyncWrite addparam failed", DXL_ID);
-      return 0;
-    }
+    Write_dyna_to_sync (DXL_ID1, groupSyncWrite, param_goal_position);
 
     // Add Dynamixel#2 goal position value to the Syncwrite parameter storage
-    dxl_addparam_result = groupSyncWrite.addParam(DXL_ID2, param_goal_position);
-    if (dxl_addparam_result != true)
-    {
-      fprintf(stderr, "[ID:%03d] groupSyncWrite addparam failed", DXL_ID2);
-      return 0;
-    }
+    Write_dyna_to_sync (DXL_ID2, groupSyncWrite, param_goal_position);
+
+
 
     // Syncwrite goal position
     dxl_comm_result = groupSyncWrite.txPacket();
@@ -259,10 +263,10 @@ int main()
     do
     {
       // Read present position
-      dxl_comm_result = packetHandler->read2ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, &dxl_present_position, &dxl_error);
+      dxl_comm_result = packetHandler->read2ByteTxRx(portHandler, DXL_ID1, ADDR_MX_PRESENT_POSITION, &dxl_present_position, &dxl_error);
       check_comm(packetHandler,dxl_comm_result,dxl_error,"");
 
-      printf("[ID:%03d] GoalPos:%03d  PresPos:%03d\n", DXL_ID, dxl_goal_position[index], dxl_present_position);
+      printf("[ID:%03d] GoalPos:%03d  PresPos:%03d\n", DXL_ID1, dxl_goal_position[index], dxl_present_position);
 
       // Read present position2
       dxl_comm_result = packetHandler->read2ByteTxRx(portHandler, DXL_ID2, ADDR_MX_PRESENT_POSITION, &dxl2_present_position, &dxl_error);
@@ -281,7 +285,7 @@ int main()
   }
 
   // Disable Dynamixel Torque
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE, &dxl_error);
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID1, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE, &dxl_error);
   check_comm(packetHandler,dxl_comm_result,dxl_error,"");
 
   // Disable Dynamixel Torque
